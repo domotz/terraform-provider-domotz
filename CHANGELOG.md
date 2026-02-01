@@ -5,10 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0]
 
 ### Added
-- Initial Phase 1 (MVP) implementation
+- Initial release
+- Support for Domotz Public API v1
+- Basic provider configuration
+- Core resource and data source implementations
 - Resources:
   - `domotz_device` - Manage external IP devices
   - `domotz_custom_tag` - Manage custom tags
@@ -23,11 +26,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API client with full CRUD operations
 - Import support for all resources
 - Comprehensive documentation and examples
-
-## [0.1.0] - TBD
-
-### Added
-- Initial release
-- Support for Domotz Public API v1
-- Basic provider configuration
-- Core resource and data source implementations
