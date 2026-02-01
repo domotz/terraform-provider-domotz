@@ -1,0 +1,66 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+terraform-provider-domotz  # Commented out to include binary in repo
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+*.tfvars  # Ignore sensitive tfvars
+!example.tfvars  # But allow example files
+*.tfplan
+tfplan
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Release artifacts
+dist/
+
+# Environment files
+.env
+.envrc
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Debug files
+__debug_bin
+
+# Test directory (local testing only)
+test/
+setup-github-repo.sh

@@ -1,0 +1,92 @@
+package client
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+)
+
+const (
+	defaultTimeout  = 30 * time.Second
+	defaultPageSize = 100
+)
+
+// Client represents the Domotz API client
+type Client struct {
+	BaseURL    string
+	APIKey     string
+	HTTPClient *http.Client
+}
+
+// NewClient creates a new Domotz API client
+func NewClient(baseURL, apiKey string) *Client {
+	return &Client{
+		BaseURL: baseURL,
+		APIKey:  apiKey,
+		HTTPClient: &http.Client{
+			Timeout: defaultTimeout,
+		},
+	}
+}
+
+// doRequest executes an HTTP request with authentication and error handling
+func (c *Client) doRequest(method, path string, body interface{}, result interface{}) error {
+	var reqBody io.Reader
+	if body != nil {
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return fmt.Errorf("failed to marshal request body: %w", err)
+		}
+		reqBody = bytes.NewBuffer(jsonData)
+	}
+
+	url := c.BaseURL + path
+	req, err := http.NewRequest(method, url, reqBody)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set headers
+	req.Header.Set("X-Api-Key", c.APIKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// Execute request
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to execute request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Handle non-2xx status codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var errResp ErrorResponse
+		if err := json.Unmarshal(respBody, &errResp); err != nil {
+			return fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(respBody))
+		}
+		return fmt.Errorf("API error (status %d): %s", resp.StatusCode, errResp.Message)
+	}
+
+	// Parse successful response
+	if result != nil && len(respBody) > 0 {
+		if err := json.Unmarshal(respBody, result); err != nil {
+			return fmt.Errorf("failed to unmarshal response: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// doRequestNoContent executes a request that expects no response body (e.g., DELETE)
+func (c *Client) doRequestNoContent(method, path string, body interface{}) error {
+	return c.doRequest(method, path, body, nil)
+}
