@@ -45,3 +45,15 @@ deps:
 
 # Run all checks before commit
 check: fmt vet test
+
+# Build binaries for all platforms
+build-all:
+	./build-all-platforms.sh
+
+# Create release (requires gh CLI)
+release: build-all
+	@echo "Creating GitHub release v$(VERSION)..."
+	gh release create v$(VERSION) \
+		--title "Terraform Provider for Domotz v$(VERSION)" \
+		--notes-file CHANGELOG.md \
+		dist/*.tar.gz dist/*.zip dist/*SHA256SUMS
