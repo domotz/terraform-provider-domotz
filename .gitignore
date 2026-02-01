@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-terraform-provider-domotz  # Commented out to include binary in repo
 
 # Test binary, built with `go test -c`
 *.test
