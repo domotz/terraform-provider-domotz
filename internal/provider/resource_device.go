@@ -34,12 +34,12 @@ type DeviceResource struct {
 
 // DeviceResourceModel describes the resource data model
 type DeviceResourceModel struct {
-	ID          types.String      `tfsdk:"id"`
-	AgentID     types.Int64       `tfsdk:"agent_id"`
-	DisplayName types.String      `tfsdk:"display_name"`
-	IPAddresses types.List        `tfsdk:"ip_addresses"`
-	UserData    *UserDataModel    `tfsdk:"user_data"`
-	Importance  types.String      `tfsdk:"importance"`
+	ID          types.String   `tfsdk:"id"`
+	AgentID     types.Int64    `tfsdk:"agent_id"`
+	DisplayName types.String   `tfsdk:"display_name"`
+	IPAddresses types.List     `tfsdk:"ip_addresses"`
+	UserData    *UserDataModel `tfsdk:"user_data"`
+	Importance  types.String   `tfsdk:"importance"`
 }
 
 // UserDataModel describes the user_data nested object

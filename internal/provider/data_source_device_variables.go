@@ -21,9 +21,9 @@ type DeviceVariablesDataSource struct {
 }
 
 type DeviceVariablesDataSourceModel struct {
-	AgentID   types.Int64      `tfsdk:"agent_id"`
-	DeviceID  types.Int64      `tfsdk:"device_id"`
-	Variables []VariableModel  `tfsdk:"variables"`
+	AgentID   types.Int64     `tfsdk:"agent_id"`
+	DeviceID  types.Int64     `tfsdk:"device_id"`
+	Variables []VariableModel `tfsdk:"variables"`
 }
 
 type VariableModel struct {

@@ -34,20 +34,20 @@ type DeviceUserData struct {
 
 // Device represents a monitored device
 type Device struct {
-	ID                     int32          `json:"id"`
-	AgentID                int32          `json:"agent_id"`
-	DisplayName            string         `json:"display_name"`
-	Protocol               string         `json:"protocol"` // IP, DUMMY, etc.
-	IPAddresses            []string       `json:"ip_addresses,omitempty"`
-	Vendor                 string         `json:"vendor,omitempty"`          // Auto-discovered vendor (e.g., "Ubiquiti Inc")
-	Model                  string         `json:"model,omitempty"`           // Auto-discovered model
-	UserData               DeviceUserData `json:"user_data"`                 // User-editable metadata
-	AuthenticationStatus   string         `json:"authentication_status,omitempty"`
-	Importance             string         `json:"importance,omitempty"` // VITAL, FLOATING
-	HWAddress              string         `json:"hw_address,omitempty"`
-	Zone                   string         `json:"zone,omitempty"`
-	FirstSeenAt            time.Time      `json:"first_seen_at,omitempty"`
-	LastStatusChange       time.Time      `json:"last_status_change,omitempty"`
+	ID                   int32          `json:"id"`
+	AgentID              int32          `json:"agent_id"`
+	DisplayName          string         `json:"display_name"`
+	Protocol             string         `json:"protocol"` // IP, DUMMY, etc.
+	IPAddresses          []string       `json:"ip_addresses,omitempty"`
+	Vendor               string         `json:"vendor,omitempty"` // Auto-discovered vendor (e.g., "Ubiquiti Inc")
+	Model                string         `json:"model,omitempty"`  // Auto-discovered model
+	UserData             DeviceUserData `json:"user_data"`        // User-editable metadata
+	AuthenticationStatus string         `json:"authentication_status,omitempty"`
+	Importance           string         `json:"importance,omitempty"` // VITAL, FLOATING
+	HWAddress            string         `json:"hw_address,omitempty"`
+	Zone                 string         `json:"zone,omitempty"`
+	FirstSeenAt          time.Time      `json:"first_seen_at,omitempty"`
+	LastStatusChange     time.Time      `json:"last_status_change,omitempty"`
 }
 
 // CreateDeviceRequest represents the request to create a new device

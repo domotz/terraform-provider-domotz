@@ -22,8 +22,8 @@ type DevicesDataSource struct {
 }
 
 type DevicesDataSourceModel struct {
-	AgentID types.Int64         `tfsdk:"agent_id"`
-	Devices []DeviceListModel   `tfsdk:"devices"`
+	AgentID types.Int64       `tfsdk:"agent_id"`
+	Devices []DeviceListModel `tfsdk:"devices"`
 }
 
 type DeviceListModel struct {
@@ -32,9 +32,9 @@ type DeviceListModel struct {
 	Protocol    types.String `tfsdk:"protocol"`
 	IPAddresses types.List   `tfsdk:"ip_addresses"`
 	Importance  types.String `tfsdk:"importance"`
-	Vendor      types.String `tfsdk:"vendor"`       // Auto-discovered vendor
-	Model       types.String `tfsdk:"model"`        // Auto-discovered model
-	UserData    types.Object `tfsdk:"user_data"`    // User-editable metadata
+	Vendor      types.String `tfsdk:"vendor"`    // Auto-discovered vendor
+	Model       types.String `tfsdk:"model"`     // Auto-discovered model
+	UserData    types.Object `tfsdk:"user_data"` // User-editable metadata
 }
 
 type DeviceUserDataModel struct {

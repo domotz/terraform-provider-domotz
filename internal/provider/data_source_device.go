@@ -21,13 +21,13 @@ type DeviceDataSource struct {
 }
 
 type DeviceDataSourceModel struct {
-	AgentID     types.Int64       `tfsdk:"agent_id"`
-	ID          types.Int64       `tfsdk:"id"`
-	DisplayName types.String      `tfsdk:"display_name"`
-	Protocol    types.String      `tfsdk:"protocol"`
-	IPAddresses types.List        `tfsdk:"ip_addresses"`
-	Importance  types.String      `tfsdk:"importance"`
-	UserData    *UserDataModel    `tfsdk:"user_data"`
+	AgentID     types.Int64    `tfsdk:"agent_id"`
+	ID          types.Int64    `tfsdk:"id"`
+	DisplayName types.String   `tfsdk:"display_name"`
+	Protocol    types.String   `tfsdk:"protocol"`
+	IPAddresses types.List     `tfsdk:"ip_addresses"`
+	Importance  types.String   `tfsdk:"importance"`
+	UserData    *UserDataModel `tfsdk:"user_data"`
 }
 
 func (d *DeviceDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
