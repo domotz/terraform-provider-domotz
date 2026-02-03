@@ -37,7 +37,7 @@ func TestDoRequest_Authentication(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
+		_, _ = w.Write([]byte(`{}`))
 	}))
 	defer server.Close()
 
@@ -54,7 +54,7 @@ func TestDoRequest_ErrorHandling(t *testing.T) {
 	// Create test server that returns an error
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"message": "Resource not found"}`))
+		_, _ = w.Write([]byte(`{"message": "Resource not found"}`))
 	}))
 	defer server.Close()
 
