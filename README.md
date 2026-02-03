@@ -20,11 +20,11 @@ Manage your [Domotz](https://www.domotz.com/) network monitoring infrastructure 
 
 The Terraform Provider for Domotz allows you to:
 
-✅ **Automate Device Tagging** - Automatically tag devices based on vendor, model, or any attribute
-✅ **Deploy Monitoring at Scale** - Create SNMP and TCP sensors across your infrastructure
-✅ **Manage Tags as Code** - Version control your device categorization and organization
-✅ **Query Device Inventory** - Integrate Domotz data into your Terraform workflows
-✅ **Standardize Monitoring** - Ensure consistent monitoring configuration across all sites
+✅ **Automate Device Tagging** - Automatically tag devices based on vendor, model, or any attribute  
+✅ **Deploy Monitoring at Scale** - Create SNMP and TCP sensors across your infrastructure  
+✅ **Manage Tags as Code** - Version control your device categorization and organization  
+✅ **Query Device Inventory** - Integrate Domotz data into your Terraform workflows  
+✅ **Standardize Monitoring** - Ensure consistent monitoring configuration across all sites  
 
 ### Use Cases
 
@@ -942,7 +942,3 @@ This Terraform Provider for Domotz is released under the [Mozilla Public License
 ✅ **Validation:**
 - Tested with 93 devices across multiple vendors
 - Production-ready for MSP and enterprise use
-
----
-
-**Made with ❤️ for the Domotz community**
