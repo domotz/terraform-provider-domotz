@@ -12,7 +12,7 @@ Manage your [Domotz](https://www.domotz.com/) network monitoring infrastructure 
 
 - **Remote Network Monitoring** - Monitor devices, services, and network performance from anywhere
 - **Automated Device Discovery** - Automatic detection of network devices with vendor/model identification
-- **Custom Monitoring** - SNMP and TCP port monitoring (Domotz Eyes) for tailored alerting
+- **Custom Monitoring** - SNMP and TCP port monitoring for tailored alerting
 - **Multi-Tenant Architecture** - Manage multiple sites and clients from a single platform
 - **Integration APIs** - Comprehensive REST API for automation and integration
 
@@ -195,7 +195,8 @@ provider "domotz" {
   api_key = "your-api-key"
 
   # API Base URL - Optional
-  # Defaults to: https://api-eu-west-1-cell-1.domotz.com/public-api/v1
+  # - EU Region (default): `https://api-eu-west-1-cell-1.domotz.com/public-api/v1/`
+  # - US Region: `https://api-us-east-1-cell-1.domotz.com/public-api/v1/`
   base_url = "https://api-eu-west-1-cell-1.domotz.com/public-api/v1"
 }
 ```
@@ -471,7 +472,7 @@ terraform import domotz_device_tag_binding.example 200891:12792047:394382
 
 ### domotz_snmp_sensor
 
-Create SNMP monitoring sensors (Domotz Eyes).
+Create SNMP monitoring sensors.
 
 ```hcl
 # Monitor system description
@@ -532,7 +533,7 @@ terraform import domotz_snmp_sensor.example 200891:12792047:72336
 
 ### domotz_tcp_sensor
 
-Create TCP port monitoring sensors (Domotz Eyes).
+Create TCP port monitoring sensors.
 
 ```hcl
 # Monitor HTTPS port
@@ -593,7 +594,7 @@ terraform import domotz_tcp_sensor.example 200891:12792047:72337
 
 ### domotz_device
 
-⚠️ **Limited Availability** - This resource creates external IP devices (external hosts).
+Create external IP devices (external hosts).
 
 ```hcl
 resource "domotz_device" "external_server" {
@@ -835,12 +836,6 @@ curl -H "X-Api-Key: $DOMOTZ_API_KEY" \
   https://api-eu-west-1-cell-1.domotz.com/public-api/v1/agent
 ```
 
-### Device Creation Fails (400)
-
-**Error**: `failed to create device: API error (status 400)`
-
-**Solution**: External device creation requires specific API permissions. Contact Domotz support to enable this feature for your account.
-
 ### TCP Sensor Conflict (409)
 
 **Error**: `failed to create TCP sensor: API error (status 409)`
@@ -862,7 +857,9 @@ ls ~/.terraform.d/plugins/registry.terraform.io/domotz/domotz/1.0.0/
 
 - **Domotz API Portal**: https://portal.domotz.com/api/
 - **OpenAPI Specification**: https://api-eu-west-1-cell-1.domotz.com/public-api/v1/meta/open-api-definition
-- **Base URL**: `https://api-eu-west-1-cell-1.domotz.com/public-api/v1/`
+- **Base URL**: 
+  - EU Region: `https://api-eu-west-1-cell-1.domotz.com/public-api/v1/`
+  - US Region: `https://api-us-east-1-cell-1.domotz.com/public-api/v1/`
 
 ---
 
