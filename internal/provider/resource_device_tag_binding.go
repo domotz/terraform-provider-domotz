@@ -105,7 +105,7 @@ func (r *DeviceTagBindingResource) Create(ctx context.Context, req resource.Crea
 	deviceID := int32(plan.DeviceID.ValueInt64())
 	tagID := int32(plan.TagID.ValueInt64())
 
-	err := r.client.BindTagToDevice(agentID, deviceID, tagID)
+	err := r.client.BindTagToDevice(ctx, agentID, deviceID, tagID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error binding tag to device", err.Error())
 		return
@@ -127,7 +127,7 @@ func (r *DeviceTagBindingResource) Read(ctx context.Context, req resource.ReadRe
 	tagID := int32(state.TagID.ValueInt64())
 
 	// Verify the binding still exists by listing device tags
-	tags, err := r.client.ListDeviceTags(agentID, deviceID)
+	tags, err := r.client.ListDeviceTags(ctx, agentID, deviceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading device tags", err.Error())
 		return
@@ -170,7 +170,7 @@ func (r *DeviceTagBindingResource) Delete(ctx context.Context, req resource.Dele
 	deviceID := int32(state.DeviceID.ValueInt64())
 	tagID := int32(state.TagID.ValueInt64())
 
-	err := r.client.UnbindTagFromDevice(agentID, deviceID, tagID)
+	err := r.client.UnbindTagFromDevice(ctx, agentID, deviceID, tagID)
 	if err != nil {
 		var notFound *client.NotFoundError
 		if errors.As(err, &notFound) {

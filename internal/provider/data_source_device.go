@@ -114,6 +114,7 @@ func (d *DeviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	device, err := d.client.GetDevice(
+		ctx,
 		int32(config.AgentID.ValueInt64()),
 		int32(config.ID.ValueInt64()),
 	)

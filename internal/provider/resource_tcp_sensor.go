@@ -8,12 +8,15 @@ import (
 	"strings"
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -74,19 +77,28 @@ func (r *TCPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"port": schema.Int64Attribute{
-				Description: "TCP port number to monitor",
+				Description: "TCP port number to monitor (1-65535)",
 				Required:    true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
+				Validators: []validator.Int64{
+					int64validator.Between(1, 65535),
+				},
 			},
 			"category": schema.StringAttribute{
-				Description: "Sensor category (e.g., OTHER)",
+				Description: "Sensor category",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf("OTHER", "NETWORKING", "COMPUTING", "STORAGE"),
 				},
 			},
 		},
@@ -124,6 +136,7 @@ func (r *TCPSensorResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	sensor, err := r.client.CreateTCPSensor(
+		ctx,
 		int32(plan.AgentID.ValueInt64()),
 		int32(plan.DeviceID.ValueInt64()),
 		createReq,
@@ -151,6 +164,7 @@ func (r *TCPSensorResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	sensor, err := r.client.GetTCPSensor(
+		ctx,
 		int32(state.AgentID.ValueInt64()),
 		int32(state.DeviceID.ValueInt64()),
 		int32(sensorID),
@@ -194,6 +208,7 @@ func (r *TCPSensorResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	err = r.client.DeleteTCPSensor(
+		ctx,
 		int32(state.AgentID.ValueInt64()),
 		int32(state.DeviceID.ValueInt64()),
 		int32(sensorID),

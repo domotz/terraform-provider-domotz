@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -52,10 +55,19 @@ func (r *CustomTagResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"name": schema.StringAttribute{
 				Description: "Tag name",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"colour": schema.StringAttribute{
 				Description: "Tag color in hex format (e.g., #FF5733)",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^#[0-9A-Fa-f]{6}$`),
+						"must be a valid hex color (e.g., #FF5733)",
+					),
+				},
 			},
 		},
 	}
@@ -90,7 +102,7 @@ func (r *CustomTagResource) Create(ctx context.Context, req resource.CreateReque
 		Colour: plan.Colour.ValueString(),
 	}
 
-	tag, err := r.client.CreateTag(createReq)
+	tag, err := r.client.CreateTag(ctx, createReq)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating tag", err.Error())
 		return
@@ -113,7 +125,7 @@ func (r *CustomTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	tag, err := r.client.GetTag(int32(tagID))
+	tag, err := r.client.GetTag(ctx, int32(tagID))
 	if err != nil {
 		var notFound *client.NotFoundError
 		if errors.As(err, &notFound) {
@@ -150,7 +162,7 @@ func (r *CustomTagResource) Update(ctx context.Context, req resource.UpdateReque
 		Colour: &colour,
 	}
 
-	tag, err := r.client.UpdateTag(int32(tagID), updateReq)
+	tag, err := r.client.UpdateTag(ctx, int32(tagID), updateReq)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating tag", err.Error())
 		return
@@ -175,7 +187,7 @@ func (r *CustomTagResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	err = r.client.DeleteTag(int32(tagID))
+	err = r.client.DeleteTag(ctx, int32(tagID))
 	if err != nil {
 		var notFound *client.NotFoundError
 		if errors.As(err, &notFound) {

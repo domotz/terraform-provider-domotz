@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -44,7 +45,7 @@ func TestDoRequest_Authentication(t *testing.T) {
 	client := NewClient(server.URL, apiKey)
 
 	// Make a test request
-	err := client.doRequest("GET", "", nil, nil)
+	err := client.doRequest(context.Background(), "GET", "", nil, nil)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -60,8 +61,31 @@ func TestDoRequest_ErrorHandling(t *testing.T) {
 
 	client := NewClient(server.URL, "test-key")
 
-	err := client.doRequest("GET", "", nil, nil)
+	err := client.doRequest(context.Background(), "GET", "", nil, nil)
 	if err == nil {
 		t.Error("Expected error for 404 response")
+	}
+}
+
+func TestDoRequest_UserAgent(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userAgent := r.Header.Get("User-Agent")
+		expected := "terraform-provider-domotz/" + Version
+
+		if userAgent != expected {
+			t.Errorf("Expected User-Agent header %s, got %s", expected, userAgent)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+
+	client := NewClient(server.URL, "test-key")
+
+	err := client.doRequest(context.Background(), "GET", "", nil, nil)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
 	}
 }

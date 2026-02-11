@@ -8,12 +8,14 @@ import (
 	"strings"
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -75,6 +77,9 @@ func (r *SNMPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"oid": schema.StringAttribute{
 				Description: "SNMP OID to monitor",
@@ -82,12 +87,18 @@ func (r *SNMPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"category": schema.StringAttribute{
-				Description: "Sensor category (e.g., OTHER)",
+				Description: "Sensor category",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf("OTHER", "NETWORKING", "COMPUTING", "STORAGE"),
 				},
 			},
 			"value_type": schema.StringAttribute{
@@ -95,6 +106,9 @@ func (r *SNMPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf("STRING", "NUMERIC"),
 				},
 			},
 		},
@@ -133,6 +147,7 @@ func (r *SNMPSensorResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	sensor, err := r.client.CreateSNMPSensor(
+		ctx,
 		int32(plan.AgentID.ValueInt64()),
 		int32(plan.DeviceID.ValueInt64()),
 		createReq,
@@ -160,6 +175,7 @@ func (r *SNMPSensorResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	sensor, err := r.client.GetSNMPSensor(
+		ctx,
 		int32(state.AgentID.ValueInt64()),
 		int32(state.DeviceID.ValueInt64()),
 		int32(sensorID),
@@ -204,6 +220,7 @@ func (r *SNMPSensorResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 
 	err = r.client.DeleteSNMPSensor(
+		ctx,
 		int32(state.AgentID.ValueInt64()),
 		int32(state.DeviceID.ValueInt64()),
 		int32(sensorID),

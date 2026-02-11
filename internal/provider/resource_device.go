@@ -8,12 +8,14 @@ import (
 	"strings"
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -78,6 +80,9 @@ func (r *DeviceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			"display_name": schema.StringAttribute{
 				Description: "Display name for the device",
 				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"ip_addresses": schema.ListAttribute{
 				Description: "List of IP addresses for the device",
@@ -88,6 +93,9 @@ func (r *DeviceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Description: "Device importance level (VITAL, FLOATING)",
 				Optional:    true,
 				Computed:    true,
+				Validators: []validator.String{
+					stringvalidator.OneOf("VITAL", "FLOATING"),
+				},
 			},
 			"user_data": schema.SingleNestedAttribute{
 				Description: "Custom metadata for the device",
@@ -169,7 +177,7 @@ func (r *DeviceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	// Create device
-	device, err := r.client.CreateDevice(int32(plan.AgentID.ValueInt64()), createReq)
+	device, err := r.client.CreateDevice(ctx, int32(plan.AgentID.ValueInt64()), createReq)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating device",
@@ -205,7 +213,7 @@ func (r *DeviceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	// Read device from API
-	device, err := r.client.GetDevice(int32(state.AgentID.ValueInt64()), int32(deviceID))
+	device, err := r.client.GetDevice(ctx, int32(state.AgentID.ValueInt64()), int32(deviceID))
 	if err != nil {
 		var notFound *client.NotFoundError
 		if errors.As(err, &notFound) {
@@ -284,7 +292,7 @@ func (r *DeviceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// Update device
-	device, err := r.client.UpdateDevice(int32(plan.AgentID.ValueInt64()), int32(deviceID), updateReq)
+	device, err := r.client.UpdateDevice(ctx, int32(plan.AgentID.ValueInt64()), int32(deviceID), updateReq)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating device",
@@ -320,7 +328,7 @@ func (r *DeviceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 
 	// Delete device
-	err = r.client.DeleteDevice(int32(state.AgentID.ValueInt64()), int32(deviceID))
+	err = r.client.DeleteDevice(ctx, int32(state.AgentID.ValueInt64()), int32(deviceID))
 	if err != nil {
 		var notFound *client.NotFoundError
 		if errors.As(err, &notFound) {
