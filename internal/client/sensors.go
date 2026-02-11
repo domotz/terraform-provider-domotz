@@ -1,6 +1,8 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GetSNMPSensor retrieves details of a specific SNMP sensor (Domotz Eye)
 // Note: The API doesn't have a direct GET for a single sensor, so we list and filter
@@ -17,14 +19,24 @@ func (c *Client) GetSNMPSensor(agentID, deviceID, sensorID int32) (*SNMPSensor, 
 	return nil, fmt.Errorf("SNMP sensor with ID %d not found", sensorID)
 }
 
-// ListSNMPSensors retrieves all SNMP sensors (Domotz Eyes) for a device
+// ListSNMPSensors retrieves all SNMP sensors (Domotz Eyes) for a device with pagination
 func (c *Client) ListSNMPSensors(agentID, deviceID int32) ([]SNMPSensor, error) {
-	path := fmt.Sprintf("/agent/%d/device/%d/eye/snmp", agentID, deviceID)
-	var sensors []SNMPSensor
-	if err := c.doRequest("GET", path, nil, &sensors); err != nil {
-		return nil, fmt.Errorf("failed to list SNMP sensors: %w", err)
+	var allSensors []SNMPSensor
+	page := 1
+	for {
+		path := fmt.Sprintf("/agent/%d/device/%d/eye/snmp?page_size=%d&page_number=%d",
+			agentID, deviceID, defaultPageSize, page)
+		var sensors []SNMPSensor
+		if err := c.doRequest("GET", path, nil, &sensors); err != nil {
+			return nil, fmt.Errorf("failed to list SNMP sensors: %w", err)
+		}
+		allSensors = append(allSensors, sensors...)
+		if len(sensors) < defaultPageSize {
+			break
+		}
+		page++
 	}
-	return sensors, nil
+	return allSensors, nil
 }
 
 // CreateSNMPSensor creates a new SNMP sensor (Domotz Eye)
@@ -71,14 +83,24 @@ func (c *Client) GetTCPSensor(agentID, deviceID, sensorID int32) (*TCPSensor, er
 	return nil, fmt.Errorf("TCP sensor with ID %d not found", sensorID)
 }
 
-// ListTCPSensors retrieves all TCP sensors (Domotz Eyes) for a device
+// ListTCPSensors retrieves all TCP sensors (Domotz Eyes) for a device with pagination
 func (c *Client) ListTCPSensors(agentID, deviceID int32) ([]TCPSensor, error) {
-	path := fmt.Sprintf("/agent/%d/device/%d/eye/tcp", agentID, deviceID)
-	var sensors []TCPSensor
-	if err := c.doRequest("GET", path, nil, &sensors); err != nil {
-		return nil, fmt.Errorf("failed to list TCP sensors: %w", err)
+	var allSensors []TCPSensor
+	page := 1
+	for {
+		path := fmt.Sprintf("/agent/%d/device/%d/eye/tcp?page_size=%d&page_number=%d",
+			agentID, deviceID, defaultPageSize, page)
+		var sensors []TCPSensor
+		if err := c.doRequest("GET", path, nil, &sensors); err != nil {
+			return nil, fmt.Errorf("failed to list TCP sensors: %w", err)
+		}
+		allSensors = append(allSensors, sensors...)
+		if len(sensors) < defaultPageSize {
+			break
+		}
+		page++
 	}
-	return sensors, nil
+	return allSensors, nil
 }
 
 // CreateTCPSensor creates a new TCP sensor (Domotz Eye)

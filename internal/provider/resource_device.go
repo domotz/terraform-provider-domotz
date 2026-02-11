@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -206,6 +207,11 @@ func (r *DeviceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	// Read device from API
 	device, err := r.client.GetDevice(int32(state.AgentID.ValueInt64()), int32(deviceID))
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error reading device",
 			"Could not read device: "+err.Error(),
@@ -316,6 +322,10 @@ func (r *DeviceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	// Delete device
 	err = r.client.DeleteDevice(int32(state.AgentID.ValueInt64()), int32(deviceID))
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error deleting device",
 			"Could not delete device: "+err.Error(),

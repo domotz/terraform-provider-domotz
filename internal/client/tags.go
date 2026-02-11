@@ -1,6 +1,8 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GetTag retrieves details of a specific tag by listing all tags and filtering
 // Note: The API doesn't have a direct GET endpoint for a single tag
@@ -17,14 +19,23 @@ func (c *Client) GetTag(tagID int32) (*Tag, error) {
 	return nil, fmt.Errorf("tag with ID %d not found", tagID)
 }
 
-// ListTags retrieves all custom tags
+// ListTags retrieves all custom tags with pagination
 func (c *Client) ListTags() ([]Tag, error) {
-	path := "/custom-tag"
-	var response TagsResponse
-	if err := c.doRequest("GET", path, nil, &response); err != nil {
-		return nil, fmt.Errorf("failed to list tags: %w", err)
+	var allTags []Tag
+	page := 1
+	for {
+		path := fmt.Sprintf("/custom-tag?page_size=%d&page_number=%d", defaultPageSize, page)
+		var response TagsResponse
+		if err := c.doRequest("GET", path, nil, &response); err != nil {
+			return nil, fmt.Errorf("failed to list tags: %w", err)
+		}
+		allTags = append(allTags, response.Tags...)
+		if len(response.Tags) < defaultPageSize {
+			break
+		}
+		page++
 	}
-	return response.Tags, nil
+	return allTags, nil
 }
 
 // CreateTag creates a new custom tag
@@ -88,12 +99,22 @@ func (c *Client) UnbindTagFromDevice(agentID, deviceID, tagID int32) error {
 	return nil
 }
 
-// ListDeviceTags retrieves all custom tags associated with a device
+// ListDeviceTags retrieves all custom tags associated with a device with pagination
 func (c *Client) ListDeviceTags(agentID, deviceID int32) ([]Tag, error) {
-	path := fmt.Sprintf("/agent/%d/device/%d/custom-tag/binding", agentID, deviceID)
-	var tags []Tag
-	if err := c.doRequest("GET", path, nil, &tags); err != nil {
-		return nil, fmt.Errorf("failed to list device tags: %w", err)
+	var allTags []Tag
+	page := 1
+	for {
+		path := fmt.Sprintf("/agent/%d/device/%d/custom-tag/binding?page_size=%d&page_number=%d",
+			agentID, deviceID, defaultPageSize, page)
+		var tags []Tag
+		if err := c.doRequest("GET", path, nil, &tags); err != nil {
+			return nil, fmt.Errorf("failed to list device tags: %w", err)
+		}
+		allTags = append(allTags, tags...)
+		if len(tags) < defaultPageSize {
+			break
+		}
+		page++
 	}
-	return tags, nil
+	return allTags, nil
 }

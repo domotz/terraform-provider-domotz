@@ -1,13 +1,16 @@
 .PHONY: build install test testacc docs fmt vet clean
 
+VERSION ?= 1.0.0
+PLATFORM := $(shell go env GOOS)_$(shell go env GOARCH)
+
 # Build the provider
 build:
 	go build -o terraform-provider-domotz
 
 # Install the provider locally for testing
 install: build
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/domotz/domotz/0.1.0/darwin_arm64
-	cp terraform-provider-domotz ~/.terraform.d/plugins/registry.terraform.io/domotz/domotz/0.1.0/darwin_arm64/
+	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/domotz/domotz/$(VERSION)/$(PLATFORM)
+	cp terraform-provider-domotz ~/.terraform.d/plugins/registry.terraform.io/domotz/domotz/$(VERSION)/$(PLATFORM)/
 
 # Run unit tests
 test:

@@ -12,14 +12,24 @@ func (c *Client) GetDevice(agentID, deviceID int32) (*Device, error) {
 	return &device, nil
 }
 
-// ListDevices retrieves all devices for a specific agent
+// ListDevices retrieves all devices for a specific agent with pagination
 func (c *Client) ListDevices(agentID int32) ([]Device, error) {
-	path := fmt.Sprintf("/agent/%d/device", agentID)
-	var devices []Device
-	if err := c.doRequest("GET", path, nil, &devices); err != nil {
-		return nil, fmt.Errorf("failed to list devices: %w", err)
+	var allDevices []Device
+	page := 1
+	for {
+		path := fmt.Sprintf("/agent/%d/device?page_size=%d&page_number=%d",
+			agentID, defaultPageSize, page)
+		var devices []Device
+		if err := c.doRequest("GET", path, nil, &devices); err != nil {
+			return nil, fmt.Errorf("failed to list devices: %w", err)
+		}
+		allDevices = append(allDevices, devices...)
+		if len(devices) < defaultPageSize {
+			break
+		}
+		page++
 	}
-	return devices, nil
+	return allDevices, nil
 }
 
 // CreateDevice creates a new external IP device (external host)
