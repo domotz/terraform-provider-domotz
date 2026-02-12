@@ -9,7 +9,6 @@ import (
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -37,7 +36,6 @@ type TCPSensorResourceModel struct {
 	ID       types.String `tfsdk:"id"`
 	AgentID  types.Int64  `tfsdk:"agent_id"`
 	DeviceID types.Int64  `tfsdk:"device_id"`
-	Name     types.String `tfsdk:"name"`
 	Port     types.Int64  `tfsdk:"port"`
 }
 
@@ -68,16 +66,6 @@ func (r *TCPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Required:    true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
-				},
-			},
-			"name": schema.StringAttribute{
-				Description: "Sensor name",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
 				},
 			},
 			"port": schema.Int64Attribute{
@@ -119,7 +107,6 @@ func (r *TCPSensorResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	createReq := client.CreateTCPSensorRequest{
-		Name: plan.Name.ValueString(),
 		Port: int32(plan.Port.ValueInt64()),
 	}
 
@@ -167,7 +154,6 @@ func (r *TCPSensorResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	state.Name = types.StringValue(sensor.Name)
 	state.Port = types.Int64Value(int64(sensor.Port))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)

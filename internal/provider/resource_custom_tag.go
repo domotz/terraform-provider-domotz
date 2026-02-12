@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"strconv"
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
@@ -60,13 +59,10 @@ func (r *CustomTagResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				},
 			},
 			"colour": schema.StringAttribute{
-				Description: "Tag color in hex format (e.g., #FF5733)",
+				Description: "Tag color (gray, light-blue, dark-green, yellow, red, purple, blue, orange, pink, green)",
 				Required:    true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^#[0-9A-Fa-f]{6}$`),
-						"must be a valid hex color (e.g., #FF5733)",
-					),
+					stringvalidator.OneOf("gray", "light-blue", "dark-green", "yellow", "red", "purple", "blue", "orange", "pink", "green"),
 				},
 			},
 		},
