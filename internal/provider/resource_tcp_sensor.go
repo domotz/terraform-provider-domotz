@@ -8,12 +8,14 @@ import (
 	"strings"
 
 	"github.com/domotz/terraform-provider-domotz/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -34,9 +36,7 @@ type TCPSensorResourceModel struct {
 	ID       types.String `tfsdk:"id"`
 	AgentID  types.Int64  `tfsdk:"agent_id"`
 	DeviceID types.Int64  `tfsdk:"device_id"`
-	Name     types.String `tfsdk:"name"`
 	Port     types.Int64  `tfsdk:"port"`
-	Category types.String `tfsdk:"category"`
 }
 
 func (r *TCPSensorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -68,25 +68,14 @@ func (r *TCPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 					int64planmodifier.RequiresReplace(),
 				},
 			},
-			"name": schema.StringAttribute{
-				Description: "Sensor name",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
 			"port": schema.Int64Attribute{
-				Description: "TCP port number to monitor",
+				Description: "TCP port number to monitor (1-65535)",
 				Required:    true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
-			},
-			"category": schema.StringAttribute{
-				Description: "Sensor category (e.g., OTHER)",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+				Validators: []validator.Int64{
+					int64validator.Between(1, 65535),
 				},
 			},
 		},
@@ -118,12 +107,11 @@ func (r *TCPSensorResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	createReq := client.CreateTCPSensorRequest{
-		Name:     plan.Name.ValueString(),
-		Port:     int32(plan.Port.ValueInt64()),
-		Category: plan.Category.ValueString(),
+		Port: int32(plan.Port.ValueInt64()),
 	}
 
 	sensor, err := r.client.CreateTCPSensor(
+		ctx,
 		int32(plan.AgentID.ValueInt64()),
 		int32(plan.DeviceID.ValueInt64()),
 		createReq,
@@ -151,6 +139,7 @@ func (r *TCPSensorResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	sensor, err := r.client.GetTCPSensor(
+		ctx,
 		int32(state.AgentID.ValueInt64()),
 		int32(state.DeviceID.ValueInt64()),
 		int32(sensorID),
@@ -165,9 +154,7 @@ func (r *TCPSensorResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	state.Name = types.StringValue(sensor.Name)
 	state.Port = types.Int64Value(int64(sensor.Port))
-	state.Category = types.StringValue(sensor.Category)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -194,6 +181,7 @@ func (r *TCPSensorResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	err = r.client.DeleteTCPSensor(
+		ctx,
 		int32(state.AgentID.ValueInt64()),
 		int32(state.DeviceID.ValueInt64()),
 		int32(sensorID),

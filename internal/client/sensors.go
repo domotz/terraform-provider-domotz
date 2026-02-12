@@ -1,13 +1,14 @@
 package client
 
 import (
+	"context"
 	"fmt"
 )
 
 // GetSNMPSensor retrieves details of a specific SNMP sensor (Domotz Eye)
 // Note: The API doesn't have a direct GET for a single sensor, so we list and filter
-func (c *Client) GetSNMPSensor(agentID, deviceID, sensorID int32) (*SNMPSensor, error) {
-	sensors, err := c.ListSNMPSensors(agentID, deviceID)
+func (c *Client) GetSNMPSensor(ctx context.Context, agentID, deviceID, sensorID int32) (*SNMPSensor, error) {
+	sensors, err := c.ListSNMPSensors(ctx, agentID, deviceID)
 	if err != nil {
 		return nil, err
 	}
@@ -20,10 +21,10 @@ func (c *Client) GetSNMPSensor(agentID, deviceID, sensorID int32) (*SNMPSensor, 
 }
 
 // ListSNMPSensors retrieves all SNMP sensors (Domotz Eyes) for a device
-func (c *Client) ListSNMPSensors(agentID, deviceID int32) ([]SNMPSensor, error) {
+func (c *Client) ListSNMPSensors(ctx context.Context, agentID, deviceID int32) ([]SNMPSensor, error) {
 	path := fmt.Sprintf("/agent/%d/device/%d/eye/snmp", agentID, deviceID)
 	var sensors []SNMPSensor
-	if err := c.doRequest("GET", path, nil, &sensors); err != nil {
+	if err := c.doRequest(ctx, "GET", path, nil, &sensors); err != nil {
 		return nil, fmt.Errorf("failed to list SNMP sensors: %w", err)
 	}
 	return sensors, nil
@@ -31,13 +32,13 @@ func (c *Client) ListSNMPSensors(agentID, deviceID int32) ([]SNMPSensor, error) 
 
 // CreateSNMPSensor creates a new SNMP sensor (Domotz Eye)
 // Note: API returns 201 with empty body, so we list and find by OID
-func (c *Client) CreateSNMPSensor(agentID, deviceID int32, req CreateSNMPSensorRequest) (*SNMPSensor, error) {
+func (c *Client) CreateSNMPSensor(ctx context.Context, agentID, deviceID int32, req CreateSNMPSensorRequest) (*SNMPSensor, error) {
 	path := fmt.Sprintf("/agent/%d/device/%d/eye/snmp", agentID, deviceID)
-	if err := c.doRequestNoContent("POST", path, req); err != nil {
+	if err := c.doRequestNoContent(ctx, "POST", path, req); err != nil {
 		return nil, fmt.Errorf("failed to create SNMP sensor: %w", err)
 	}
 	// API returns empty body, find created sensor by OID
-	sensors, err := c.ListSNMPSensors(agentID, deviceID)
+	sensors, err := c.ListSNMPSensors(ctx, agentID, deviceID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find created sensor: %w", err)
 	}
@@ -50,9 +51,9 @@ func (c *Client) CreateSNMPSensor(agentID, deviceID int32, req CreateSNMPSensorR
 }
 
 // DeleteSNMPSensor deletes an SNMP sensor (Domotz Eye)
-func (c *Client) DeleteSNMPSensor(agentID, deviceID, sensorID int32) error {
+func (c *Client) DeleteSNMPSensor(ctx context.Context, agentID, deviceID, sensorID int32) error {
 	path := fmt.Sprintf("/agent/%d/device/%d/eye/snmp/%d", agentID, deviceID, sensorID)
-	if err := c.doRequestNoContent("DELETE", path, nil); err != nil {
+	if err := c.doRequestNoContent(ctx, "DELETE", path, nil); err != nil {
 		return fmt.Errorf("failed to delete SNMP sensor: %w", err)
 	}
 	return nil
@@ -60,8 +61,8 @@ func (c *Client) DeleteSNMPSensor(agentID, deviceID, sensorID int32) error {
 
 // GetTCPSensor retrieves details of a specific TCP sensor (Domotz Eye)
 // Note: The API doesn't have a direct GET for a single sensor, so we list and filter
-func (c *Client) GetTCPSensor(agentID, deviceID, sensorID int32) (*TCPSensor, error) {
-	sensors, err := c.ListTCPSensors(agentID, deviceID)
+func (c *Client) GetTCPSensor(ctx context.Context, agentID, deviceID, sensorID int32) (*TCPSensor, error) {
+	sensors, err := c.ListTCPSensors(ctx, agentID, deviceID)
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +75,10 @@ func (c *Client) GetTCPSensor(agentID, deviceID, sensorID int32) (*TCPSensor, er
 }
 
 // ListTCPSensors retrieves all TCP sensors (Domotz Eyes) for a device
-func (c *Client) ListTCPSensors(agentID, deviceID int32) ([]TCPSensor, error) {
+func (c *Client) ListTCPSensors(ctx context.Context, agentID, deviceID int32) ([]TCPSensor, error) {
 	path := fmt.Sprintf("/agent/%d/device/%d/eye/tcp", agentID, deviceID)
 	var sensors []TCPSensor
-	if err := c.doRequest("GET", path, nil, &sensors); err != nil {
+	if err := c.doRequest(ctx, "GET", path, nil, &sensors); err != nil {
 		return nil, fmt.Errorf("failed to list TCP sensors: %w", err)
 	}
 	return sensors, nil
@@ -85,13 +86,13 @@ func (c *Client) ListTCPSensors(agentID, deviceID int32) ([]TCPSensor, error) {
 
 // CreateTCPSensor creates a new TCP sensor (Domotz Eye)
 // Note: API returns 201 with empty body, so we list and find by port
-func (c *Client) CreateTCPSensor(agentID, deviceID int32, req CreateTCPSensorRequest) (*TCPSensor, error) {
+func (c *Client) CreateTCPSensor(ctx context.Context, agentID, deviceID int32, req CreateTCPSensorRequest) (*TCPSensor, error) {
 	path := fmt.Sprintf("/agent/%d/device/%d/eye/tcp", agentID, deviceID)
-	if err := c.doRequestNoContent("POST", path, req); err != nil {
+	if err := c.doRequestNoContent(ctx, "POST", path, req); err != nil {
 		return nil, fmt.Errorf("failed to create TCP sensor: %w", err)
 	}
 	// API returns empty body, find created sensor by port
-	sensors, err := c.ListTCPSensors(agentID, deviceID)
+	sensors, err := c.ListTCPSensors(ctx, agentID, deviceID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find created sensor: %w", err)
 	}
@@ -104,9 +105,9 @@ func (c *Client) CreateTCPSensor(agentID, deviceID int32, req CreateTCPSensorReq
 }
 
 // DeleteTCPSensor deletes a TCP sensor (Domotz Eye)
-func (c *Client) DeleteTCPSensor(agentID, deviceID, sensorID int32) error {
+func (c *Client) DeleteTCPSensor(ctx context.Context, agentID, deviceID, sensorID int32) error {
 	path := fmt.Sprintf("/agent/%d/device/%d/eye/tcp/%d", agentID, deviceID, sensorID)
-	if err := c.doRequestNoContent("DELETE", path, nil); err != nil {
+	if err := c.doRequestNoContent(ctx, "DELETE", path, nil); err != nil {
 		return fmt.Errorf("failed to delete TCP sensor: %w", err)
 	}
 	return nil

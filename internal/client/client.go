@@ -2,16 +2,20 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
 const (
 	defaultTimeout  = 30 * time.Second
 	defaultPageSize = 100
+	maxRetries      = 3
+	Version         = "1.0.0"
 )
 
 // NotFoundError represents a 404 API response
@@ -39,8 +43,36 @@ func NewClient(baseURL, apiKey string) *Client {
 	}
 }
 
-// doRequest executes an HTTP request with authentication and error handling
-func (c *Client) doRequest(method, path string, body interface{}, result interface{}) error {
+// doRequest executes an HTTP request with authentication, error handling, and retries
+func (c *Client) doRequest(ctx context.Context, method, path string, body interface{}, result interface{}) error {
+	var lastErr error
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			backoff := time.Duration(1<<uint(attempt-1)) * time.Second // 1s, 2s, 4s
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(backoff):
+			}
+		}
+
+		err := c.doRequestOnce(ctx, method, path, body, result)
+		if err == nil {
+			return nil
+		}
+
+		if !isRetryableError(err) {
+			return err
+		}
+		lastErr = err
+	}
+
+	return fmt.Errorf("max retries exceeded for %s %s: %w", method, path, lastErr)
+}
+
+// doRequestOnce executes a single HTTP request
+func (c *Client) doRequestOnce(ctx context.Context, method, path string, body interface{}, result interface{}) error {
 	var reqBody io.Reader
 	if body != nil {
 		jsonData, err := json.Marshal(body)
@@ -51,7 +83,7 @@ func (c *Client) doRequest(method, path string, body interface{}, result interfa
 	}
 
 	url := c.BaseURL + path
-	req, err := http.NewRequest(method, url, reqBody)
+	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -60,6 +92,7 @@ func (c *Client) doRequest(method, path string, body interface{}, result interfa
 	req.Header.Set("X-Api-Key", c.APIKey)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", fmt.Sprintf("terraform-provider-domotz/%s", Version))
 
 	// Execute request
 	resp, err := c.HTTPClient.Do(req)
@@ -100,7 +133,19 @@ func (c *Client) doRequest(method, path string, body interface{}, result interfa
 	return nil
 }
 
+// isRetryableError checks if an error is retryable (rate limiting or transient errors)
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "status 429") ||
+		strings.Contains(errMsg, "status 502") ||
+		strings.Contains(errMsg, "status 503") ||
+		strings.Contains(errMsg, "status 504")
+}
+
 // doRequestNoContent executes a request that expects no response body (e.g., DELETE)
-func (c *Client) doRequestNoContent(method, path string, body interface{}) error {
-	return c.doRequest(method, path, body, nil)
+func (c *Client) doRequestNoContent(ctx context.Context, method, path string, body interface{}) error {
+	return c.doRequest(ctx, method, path, body, nil)
 }

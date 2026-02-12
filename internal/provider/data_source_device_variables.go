@@ -117,6 +117,7 @@ func (d *DeviceVariablesDataSource) Read(ctx context.Context, req datasource.Rea
 	}
 
 	variables, err := d.client.ListVariables(
+		ctx,
 		int32(config.AgentID.ValueInt64()),
 		int32(config.DeviceID.ValueInt64()),
 	)

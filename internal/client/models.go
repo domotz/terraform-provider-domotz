@@ -69,7 +69,7 @@ type UpdateDeviceRequest struct {
 type Tag struct {
 	ID     int32  `json:"id"`
 	Name   string `json:"name"`
-	Colour string `json:"color"` // hex color code
+	Colour string `json:"color"` // color name (gray, light-blue, dark-green, yellow, red, purple, blue, orange, pink, green)
 }
 
 // TagsResponse wraps the tags list from API
@@ -118,18 +118,14 @@ type CreateSNMPSensorRequest struct {
 // TCPSensor represents a TCP port sensor
 type TCPSensor struct {
 	ID       int32  `json:"id"`
-	AgentID  int32  `json:"agent_id"`
 	DeviceID int32  `json:"device_id"`
-	Name     string `json:"name"`
 	Port     int32  `json:"port"`
-	Category string `json:"category"`
+	Status   string `json:"status"`
 }
 
 // CreateTCPSensorRequest represents the request to create a TCP sensor
 type CreateTCPSensorRequest struct {
-	Name     string `json:"name"`
-	Port     int32  `json:"port"`
-	Category string `json:"category"`
+	Port int32 `json:"port"`
 }
 
 // Variable represents a device variable/metric

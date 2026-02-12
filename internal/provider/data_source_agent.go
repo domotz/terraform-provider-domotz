@@ -84,7 +84,7 @@ func (d *AgentDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	agent, err := d.client.GetAgent(int32(config.ID.ValueInt64()))
+	agent, err := d.client.GetAgent(ctx, int32(config.ID.ValueInt64()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading agent", err.Error())
 		return

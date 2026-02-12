@@ -143,7 +143,7 @@ func (d *DevicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	devices, err := d.client.ListDevices(int32(config.AgentID.ValueInt64()))
+	devices, err := d.client.ListDevices(ctx, int32(config.AgentID.ValueInt64()))
 	if err != nil {
 		resp.Diagnostics.AddError("Error listing devices", err.Error())
 		return
