@@ -1,6 +1,8 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GetSNMPSensor retrieves details of a specific SNMP sensor (Domotz Eye)
 // Note: The API doesn't have a direct GET for a single sensor, so we list and filter

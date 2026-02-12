@@ -1,6 +1,8 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GetVariable retrieves details of a specific variable
 func (c *Client) GetVariable(agentID, deviceID, variableID int32) (*Variable, error) {
@@ -12,12 +14,22 @@ func (c *Client) GetVariable(agentID, deviceID, variableID int32) (*Variable, er
 	return &variable, nil
 }
 
-// ListVariables retrieves all variables for a device
+// ListVariables retrieves all variables for a device with pagination
 func (c *Client) ListVariables(agentID, deviceID int32) ([]Variable, error) {
-	path := fmt.Sprintf("/agent/%d/device/%d/variable", agentID, deviceID)
-	var variables []Variable
-	if err := c.doRequest("GET", path, nil, &variables); err != nil {
-		return nil, fmt.Errorf("failed to list variables: %w", err)
+	var allVariables []Variable
+	page := 1
+	for {
+		path := fmt.Sprintf("/agent/%d/device/%d/variable?page_size=%d&page_number=%d",
+			agentID, deviceID, defaultPageSize, page)
+		var variables []Variable
+		if err := c.doRequest("GET", path, nil, &variables); err != nil {
+			return nil, fmt.Errorf("failed to list variables: %w", err)
+		}
+		allVariables = append(allVariables, variables...)
+		if len(variables) < defaultPageSize {
+			break
+		}
+		page++
 	}
-	return variables, nil
+	return allVariables, nil
 }

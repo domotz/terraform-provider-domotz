@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -155,6 +156,11 @@ func (r *TCPSensorResource) Read(ctx context.Context, req resource.ReadRequest, 
 		int32(sensorID),
 	)
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Error reading TCP sensor", err.Error())
 		return
 	}
@@ -193,6 +199,10 @@ func (r *TCPSensorResource) Delete(ctx context.Context, req resource.DeleteReque
 		int32(sensorID),
 	)
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			return
+		}
 		resp.Diagnostics.AddError("Error deleting TCP sensor", err.Error())
 		return
 	}

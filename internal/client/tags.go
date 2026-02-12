@@ -1,6 +1,8 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GetTag retrieves details of a specific tag by listing all tags and filtering
 // Note: The API doesn't have a direct GET endpoint for a single tag

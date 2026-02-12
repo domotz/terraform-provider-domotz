@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -164,6 +165,11 @@ func (r *SNMPSensorResource) Read(ctx context.Context, req resource.ReadRequest,
 		int32(sensorID),
 	)
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Error reading SNMP sensor", err.Error())
 		return
 	}
@@ -203,6 +209,10 @@ func (r *SNMPSensorResource) Delete(ctx context.Context, req resource.DeleteRequ
 		int32(sensorID),
 	)
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			return
+		}
 		resp.Diagnostics.AddError("Error deleting SNMP sensor", err.Error())
 		return
 	}

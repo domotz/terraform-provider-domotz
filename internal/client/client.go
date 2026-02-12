@@ -14,6 +14,13 @@ const (
 	defaultPageSize = 100
 )
 
+// NotFoundError represents a 404 API response
+type NotFoundError struct {
+	Message string
+}
+
+func (e *NotFoundError) Error() string { return e.Message }
+
 // Client represents the Domotz API client
 type Client struct {
 	BaseURL    string
@@ -67,7 +74,14 @@ func (c *Client) doRequest(method, path string, body interface{}, result interfa
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Handle non-2xx status codes
+	// Handle 404 Not Found specifically
+	if resp.StatusCode == 404 {
+		return &NotFoundError{
+			Message: fmt.Sprintf("resource not found: %s %s", method, path),
+		}
+	}
+
+	// Handle other non-2xx status codes
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		var errResp ErrorResponse
 		if err := json.Unmarshal(respBody, &errResp); err != nil {

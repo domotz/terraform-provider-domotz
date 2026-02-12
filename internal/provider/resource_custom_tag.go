@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -114,6 +115,11 @@ func (r *CustomTagResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	tag, err := r.client.GetTag(int32(tagID))
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Error reading tag", err.Error())
 		return
 	}
@@ -171,6 +177,10 @@ func (r *CustomTagResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	err = r.client.DeleteTag(int32(tagID))
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			return
+		}
 		resp.Diagnostics.AddError("Error deleting tag", err.Error())
 		return
 	}

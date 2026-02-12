@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -171,6 +172,10 @@ func (r *DeviceTagBindingResource) Delete(ctx context.Context, req resource.Dele
 
 	err := r.client.UnbindTagFromDevice(agentID, deviceID, tagID)
 	if err != nil {
+		var notFound *client.NotFoundError
+		if errors.As(err, &notFound) {
+			return
+		}
 		resp.Diagnostics.AddError("Error unbinding tag from device", err.Error())
 		return
 	}
