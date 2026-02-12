@@ -98,17 +98,17 @@ func (r *SNMPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf("OTHER", "NETWORKING", "COMPUTING", "STORAGE"),
+					stringvalidator.OneOf("OTHER", "CONSUMABLE", "CPU", "DISK_SPACE", "MEMORY", "NETWORK_TRAFFIC", "TEMPERATURE"),
 				},
 			},
 			"value_type": schema.StringAttribute{
-				Description: "Value type (STRING, NUMERIC)",
+				Description: "Value type (STRING, NUMERIC, ENUM)",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf("STRING", "NUMERIC"),
+					stringvalidator.OneOf("STRING", "NUMERIC", "ENUM"),
 				},
 			},
 		},

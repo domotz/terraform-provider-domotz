@@ -122,14 +122,12 @@ type TCPSensor struct {
 	DeviceID int32  `json:"device_id"`
 	Name     string `json:"name"`
 	Port     int32  `json:"port"`
-	Category string `json:"category"`
 }
 
 // CreateTCPSensorRequest represents the request to create a TCP sensor
 type CreateTCPSensorRequest struct {
-	Name     string `json:"name"`
-	Port     int32  `json:"port"`
-	Category string `json:"category"`
+	Name string `json:"name"`
+	Port int32  `json:"port"`
 }
 
 // Variable represents a device variable/metric

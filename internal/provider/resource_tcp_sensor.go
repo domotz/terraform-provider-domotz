@@ -39,7 +39,6 @@ type TCPSensorResourceModel struct {
 	DeviceID types.Int64  `tfsdk:"device_id"`
 	Name     types.String `tfsdk:"name"`
 	Port     types.Int64  `tfsdk:"port"`
-	Category types.String `tfsdk:"category"`
 }
 
 func (r *TCPSensorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -91,16 +90,6 @@ func (r *TCPSensorResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 					int64validator.Between(1, 65535),
 				},
 			},
-			"category": schema.StringAttribute{
-				Description: "Sensor category",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.OneOf("OTHER", "NETWORKING", "COMPUTING", "STORAGE"),
-				},
-			},
 		},
 	}
 }
@@ -130,9 +119,8 @@ func (r *TCPSensorResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	createReq := client.CreateTCPSensorRequest{
-		Name:     plan.Name.ValueString(),
-		Port:     int32(plan.Port.ValueInt64()),
-		Category: plan.Category.ValueString(),
+		Name: plan.Name.ValueString(),
+		Port: int32(plan.Port.ValueInt64()),
 	}
 
 	sensor, err := r.client.CreateTCPSensor(
@@ -181,7 +169,6 @@ func (r *TCPSensorResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	state.Name = types.StringValue(sensor.Name)
 	state.Port = types.Int64Value(int64(sensor.Port))
-	state.Category = types.StringValue(sensor.Category)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
