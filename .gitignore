@@ -4,6 +4,10 @@
 *.dll
 *.so
 *.dylib
+terraform-provider-domotz
+
+# Task tracking files (internal use only)
+PENDING_TASKS.md
 
 # Test binary, built with `go test -c`
 *.test
