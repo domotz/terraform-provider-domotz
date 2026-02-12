@@ -19,23 +19,14 @@ func (c *Client) GetTag(tagID int32) (*Tag, error) {
 	return nil, fmt.Errorf("tag with ID %d not found", tagID)
 }
 
-// ListTags retrieves all custom tags with pagination
+// ListTags retrieves all custom tags
 func (c *Client) ListTags() ([]Tag, error) {
-	var allTags []Tag
-	page := 1
-	for {
-		path := fmt.Sprintf("/custom-tag?page_size=%d&page_number=%d", defaultPageSize, page)
-		var response TagsResponse
-		if err := c.doRequest("GET", path, nil, &response); err != nil {
-			return nil, fmt.Errorf("failed to list tags: %w", err)
-		}
-		allTags = append(allTags, response.Tags...)
-		if len(response.Tags) < defaultPageSize {
-			break
-		}
-		page++
+	path := "/custom-tag"
+	var response TagsResponse
+	if err := c.doRequest("GET", path, nil, &response); err != nil {
+		return nil, fmt.Errorf("failed to list tags: %w", err)
 	}
-	return allTags, nil
+	return response.Tags, nil
 }
 
 // CreateTag creates a new custom tag
@@ -99,22 +90,12 @@ func (c *Client) UnbindTagFromDevice(agentID, deviceID, tagID int32) error {
 	return nil
 }
 
-// ListDeviceTags retrieves all custom tags associated with a device with pagination
+// ListDeviceTags retrieves all custom tags associated with a device
 func (c *Client) ListDeviceTags(agentID, deviceID int32) ([]Tag, error) {
-	var allTags []Tag
-	page := 1
-	for {
-		path := fmt.Sprintf("/agent/%d/device/%d/custom-tag/binding?page_size=%d&page_number=%d",
-			agentID, deviceID, defaultPageSize, page)
-		var tags []Tag
-		if err := c.doRequest("GET", path, nil, &tags); err != nil {
-			return nil, fmt.Errorf("failed to list device tags: %w", err)
-		}
-		allTags = append(allTags, tags...)
-		if len(tags) < defaultPageSize {
-			break
-		}
-		page++
+	path := fmt.Sprintf("/agent/%d/device/%d/custom-tag/binding", agentID, deviceID)
+	var tags []Tag
+	if err := c.doRequest("GET", path, nil, &tags); err != nil {
+		return nil, fmt.Errorf("failed to list device tags: %w", err)
 	}
-	return allTags, nil
+	return tags, nil
 }
