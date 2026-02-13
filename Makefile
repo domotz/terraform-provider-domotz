@@ -1,6 +1,6 @@
 .PHONY: build install test testacc docs fmt vet clean
 
-VERSION ?= 1.0.0
+VERSION ?= 1.1.0
 PLATFORM := $(shell go env GOOS)_$(shell go env GOARCH)
 
 # Build the provider
